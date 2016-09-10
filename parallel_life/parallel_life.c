@@ -92,7 +92,7 @@ void visualize(field_t* field) {
             if(*(cur_data + size * i + j)) {
                 printf("#");
             } else {
-                printf(" ");
+                printf("-");
             }
         }
         printf("\n");
@@ -116,6 +116,7 @@ void life(int argc, char** argv) {
             x[i] = atoi(argv[2*i + 5]);
             y[i] = atoi(argv[2*i + 6]);
         }
+        init_field_with_data(&field, size, start_alive, x, y);
     }
 
     visualize(&field);
