@@ -9,7 +9,7 @@
 
 #define TM 3000
 #define NUMB_OF_THREADS 4
-#define WAIT_TIME_MICROSECONDS 500
+#define WAIT_TIME_MICROSECONDS 100
 
 struct field{
     int step;
@@ -24,13 +24,15 @@ typedef struct field field_t;
 struct thread_info{
     int me_numb;
     int steps;
+    int work_ind;
     field_t* field;
 };
 
 typedef struct thread_info thread_info_t;
 
 pthread_t threads[NUMB_OF_THREADS];
-pthread_mutex_t mutex;
+pthread_mutex_t mutex_step;
+pthread_mutex_t mutex_work_ind;
 int done_work;
 thread_info_t thread_info[NUMB_OF_THREADS];
 int dirs[8][2] = {{0,1}, {1,0}, {-1,0}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
@@ -116,7 +118,7 @@ void visualize(field_t* field) {
     }
 }
 
-static void thread_func(int* id_p, void* data) {
+void* thread_func(void* data) {
     field_t* field = (*(thread_info_t*)data).field;
     int size = field->size;
     int me_id = (*(thread_info_t*)data).me_numb;
@@ -124,8 +126,8 @@ static void thread_func(int* id_p, void* data) {
 
     for(int t = 0; t < steps; ++t) {
 
-        char* prev_data = field->data[1 - field->step & 1];
-        char* cur_data = field->data[field->step & 1];
+        char* prev_data = field->data[t & 1];
+        char* cur_data = field->data[1 - t & 1];
         int cur_sum, nx, ny;
 
 
@@ -149,18 +151,24 @@ static void thread_func(int* id_p, void* data) {
             }
         }
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex_step);
+            ((thread_info_t*)data)->work_ind = 1;
             ++done_work;
-        pthread_mutex_unlock(&mutex);
+            // printf("id: %d, step: %d inside\n", me_id, t);
+        pthread_mutex_unlock(&mutex_step);
+        // printf("id: %d, step: %d outside\n", me_id, t);
         int go = 0;
         while(!go) {
-            pthread_mutex_lock(&mutex);
-                if(!done_work) {
+            pthread_mutex_lock(&mutex_work_ind);
+                if(!((thread_info_t*)data)->work_ind) {
                     go = 1;
                 }
-            pthread_mutex_unlock(&mutex);
+            pthread_mutex_unlock(&mutex_work_ind);
+            usleep(rand()%(NUMB_OF_THREADS*WAIT_TIME_MICROSECONDS));
         }
     }
+
+    return NULL;
 }
 
 void life(int argc, char** argv) {
@@ -203,43 +211,46 @@ void life(int argc, char** argv) {
     }
     usleep(TM);
 
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mutex_step, NULL);
+    pthread_mutex_init(&mutex_work_ind, NULL);
 
     int start_time = clock();
 
     done_work = 0;
-    ++field.step;
 
     for(int i = 0;i < NUMB_OF_THREADS;++i) {
         thread_info[i].me_numb = i;
         thread_info[i].steps = steps;
         thread_info[i].field = &field;
+        thread_info[i].work_ind = 0;
         if(pthread_create(threads + i, NULL, thread_func, thread_info + i)) {
             printf("ERROR_CREATE_THREAD\n");
             return;
         }
     }
-
-    int ex;
     
     while(field.step < steps) {
         // calc_next(&field);
-        ex = 0;
-        while(!ex) {
-            pthread_mutex_lock(&mutex);
-                if(done_work == NUMB_OF_THREADS) {
-                    ex = 1;
-                    if(do_draw) {
-                        visualize(&field);
-                    }
-                    ++field.step;
-                    done_work = 0;
+        pthread_mutex_lock(&mutex_step);
+            // printf("main_inside\n");
+            if(done_work == NUMB_OF_THREADS) {
+                if(do_draw) {
+                    visualize(&field);
                 }
-            pthread_mutex_unlock(&mutex);
-            usleep(TM);
-            // usleep(WAIT_TIME_MICROSECONDS);
-        }
+                ++field.step;
+                done_work = 0;
+                pthread_mutex_lock(&mutex_work_ind);
+                    for(int i = 0; i < NUMB_OF_THREADS;++i) {
+                        (thread_info + i)->work_ind = 0;
+                    }
+                pthread_mutex_unlock(&mutex_work_ind);
+            }
+        pthread_mutex_unlock(&mutex_step);
+        // printf("main_outside\n");
+        usleep(rand()%(WAIT_TIME_MICROSECONDS));
+        // usleep(WAIT_TIME_MICROSECONDS);
     }
+
     int status;
 
     for(int i = 0;i < NUMB_OF_THREADS; ++i) {
@@ -249,11 +260,12 @@ void life(int argc, char** argv) {
         }
     }
 
-    int times_per_sec = (clock() - start_time)/1000;
-    printf("\nsteps: %d, work time:%d\n", steps, times_per_sec);
+    int times_per_sec = (clock() - start_time)/100000;
+    printf("\nsteps: %d, work time: %d\n", steps, times_per_sec);
 }
 
 int main(int argc, char** argv) {
+    srand(time(NULL));
     life(argc, argv);
     // char c = '#';
     // printf("%c\n",c);
