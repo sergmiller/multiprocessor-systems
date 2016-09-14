@@ -171,38 +171,12 @@ void* thread_func(void* data) {
     return NULL;
 }
 
-void life(int argc, char** argv) {
-    assert(argc >= 5 || argc == 1);
-    int size, steps, do_draw, start_alive;
-    if(argc == 1) {
-        freopen("input.txt", "r", stdin);
-        scanf("%d%d%d%d",&size, &steps, &do_draw, &start_alive);
-    } else {
-        size = atoi(argv[1]);
-        steps = atoi(argv[2]);
-        do_draw = atoi(argv[3]);
-        start_alive = atoi(argv[4]);
-    }
+void parallel_life(int size, int steps, int do_draw, int start_alive, int prob, int* x, int* y) {
    
     field_t field;
     if(start_alive == -1) {
-        int p = 2;
-        if(argc >= 6) {
-            p = atoi(argv[5]);
-        }
-        init_field_with_rand(&field, size, p);
-    } else {
-        assert(argc > 4 + 2*start_alive || argc == 1);        
-        int* x = (int*)malloc(start_alive * sizeof(int));
-        int* y = (int*)malloc(start_alive * sizeof(int));
-        for(int i = 0;i < start_alive; ++i) {
-            if(argc == 1) {
-                scanf("%d%d", &x[i], &y[i]);
-            } else {
-                x[i] = atoi(argv[2*i + 5]);
-                y[i] = atoi(argv[2*i + 6]);
-            }
-        }
+        init_field_with_rand(&field, size, prob);
+    } else { 
         init_field_with_data(&field, size, start_alive, x, y);
     }
 
@@ -214,7 +188,7 @@ void life(int argc, char** argv) {
     pthread_mutex_init(&mutex_step, NULL);
     pthread_mutex_init(&mutex_work_ind, NULL);
 
-    int start_time = clock();
+    double start_time = clock();
 
     done_work = 0;
 
@@ -260,13 +234,82 @@ void life(int argc, char** argv) {
         }
     }
 
-    int times_per_sec = (clock() - start_time)/100000;
-    printf("\nsteps: %d, work time: %d\n", steps, times_per_sec);
+    double times_per_sec = (clock() - start_time)/CLOCKS_PER_SEC;
+    printf("PARALLEL_MODE: threads %d, steps: %d, size: %d, work time: %f\n", NUMB_OF_THREADS, steps, size, times_per_sec);
+}
+
+void life(int size, int steps, int do_draw, int start_alive, int prob, int* x, int* y) {
+   
+    field_t field;
+    if(start_alive == -1) {
+        init_field_with_rand(&field, size, prob);
+    } else { 
+        init_field_with_data(&field, size, start_alive, x, y);
+    }
+
+    if(do_draw) {
+        visualize(&field);
+        usleep(TM);
+    }
+
+    double start_time = clock();
+    
+    while(field.step < steps) {
+        calc_next(&field);
+        if(do_draw) {
+            visualize(&field);
+            usleep(TM);
+        }
+        ++field.step;
+    }
+
+    double times_per_sec = (clock() - start_time)/CLOCKS_PER_SEC;
+    printf("ONETHREAD_MODE: threads %d, steps: %d, size: %d, work time: %f\n", NUMB_OF_THREADS, steps, size, times_per_sec);
+}
+
+void solve(int argc, char** argv) {
+    assert(argc >= 5 || argc == 1);
+    int size, steps, do_draw, start_alive, prob = 2;
+    int* x = NULL;
+    int* y = NULL;
+    if(argc == 1) {
+        freopen("input.txt", "r", stdin);
+        scanf("%d%d%d%d",&size, &steps, &do_draw, &start_alive);
+    } else {
+        size = atoi(argv[1]);
+        steps = atoi(argv[2]);
+        do_draw = atoi(argv[3]);
+        start_alive = atoi(argv[4]);
+    }
+   
+    field_t field;
+    if(start_alive == -1) {
+        if(argc >= 6) {
+            prob = atoi(argv[5]);
+        }
+        // init_field_with_rand(&field, size, p);
+    } else {
+        assert(argc > 4 + 2*start_alive || argc == 1);        
+        x = (int*)malloc(start_alive * sizeof(int));
+        y = (int*)malloc(start_alive * sizeof(int));
+        for(int i = 0;i < start_alive; ++i) {
+            if(argc == 1) {
+                scanf("%d%d", &x[i], &y[i]);
+            } else {
+                x[i] = atoi(argv[2*i + 5]);
+                y[i] = atoi(argv[2*i + 6]);
+            }
+        }
+        // init_field_with_data(&field, size, start_alive, x, y);
+    }
+
+    parallel_life(size, steps, do_draw, start_alive, prob, x, y);
+    life(size, steps, do_draw, start_alive, prob, x, y);
 }
 
 int main(int argc, char** argv) {
     srand(time(NULL));
-    life(argc, argv);
+    solve(argc, argv);
     // char c = '#';
     // printf("%c\n",c);
     // printf("%c\n",c-1);
