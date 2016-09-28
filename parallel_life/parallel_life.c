@@ -9,7 +9,7 @@
 
 #define TM 3000
 #define NUMB_OF_THREADS 4
-#define WAIT_TIME_MICROSECONDS 100
+#define WAIT_TIME_MICROSECONDS 20
 
 struct field{
     int step;
@@ -32,7 +32,7 @@ typedef struct thread_info thread_info_t;
 
 pthread_t threads[NUMB_OF_THREADS];
 pthread_mutex_t mutex_step;
-pthread_mutex_t mutex_work_ind;
+pthread_cond_t cv;
 int done_work;
 thread_info_t thread_info[NUMB_OF_THREADS];
 int dirs[8][2] = {{0,1}, {1,0}, {-1,0}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
@@ -73,11 +73,6 @@ void calc_next(field_t* field) {
 
     ++field->step;
 
-    if(!field->qnt) {
-        memset(field->data[field->step & 1], 0, size * size * sizeof(char));
-        return;
-    }
-
     char* prev_data = field->data[1 - field->step & 1];
     char* cur_data = field->data[field->step & 1];
 
@@ -93,7 +88,9 @@ void calc_next(field_t* field) {
                 }
             }
 
-            if((!*(prev_data + size * i + j) && cur_sum == 3) || (*(prev_data + size * i + j) && (cur_sum == 2 || cur_sum == 3))) {
+            char prev_point = *(prev_data + size * i + j);
+
+            if((!prev_point && cur_sum == 3) || (prev_point && (cur_sum == 2 || cur_sum == 3))) {
                  *(cur_data + size * i + j) = 1;
             } else {
                  *(cur_data + size * i + j) = 0;
@@ -118,11 +115,12 @@ void visualize(field_t* field) {
     }
 }
 
-void* thread_func(void* data) {
+void* parallel_calc_next(void* data) {
     field_t* field = (*(thread_info_t*)data).field;
     int size = field->size;
     int me_id = (*(thread_info_t*)data).me_numb;
     int steps = (*(thread_info_t*)data).steps;
+    int* work_ind = &(*(thread_info_t*)data).work_ind;
 
     for(int t = 0; t < steps; ++t) {
 
@@ -131,7 +129,7 @@ void* thread_func(void* data) {
         int cur_sum, nx, ny;
 
 
-        for(int i = me_id; i < size; i += NUMB_OF_THREADS) {
+        for(int i = size/NUMB_OF_THREADS * me_id; i < size/NUMB_OF_THREADS * (me_id  + 1) + (i == NUMB_OF_THREADS - 1); ++i) {
             for(int j = 0;j < size; ++j) {
                  cur_sum = 0;
 
@@ -143,7 +141,9 @@ void* thread_func(void* data) {
                     }
                 }
 
-                if((!*(prev_data + size * i + j) && cur_sum == 3) || (*(prev_data + size * i + j) && (cur_sum == 2 || cur_sum == 3))) {
+                char prev_point = *(prev_data + size * i + j);
+
+                if((!prev_point && cur_sum == 3) || (prev_point && (cur_sum == 2 || cur_sum == 3))) {
                      *(cur_data + size * i + j) = 1;
                 } else {
                      *(cur_data + size * i + j) = 0;
@@ -152,20 +152,12 @@ void* thread_func(void* data) {
         }
 
         pthread_mutex_lock(&mutex_step);
-            ((thread_info_t*)data)->work_ind = 1;
             ++done_work;
-            // printf("id: %d, step: %d inside\n", me_id, t);
+            *work_ind = 1;
+            while(!*work_ind) {
+                pthread_cond_wait(&cv, &mutex_step);
+            }
         pthread_mutex_unlock(&mutex_step);
-        // printf("id: %d, step: %d outside\n", me_id, t);
-        int go = 0;
-        while(!go) {
-            pthread_mutex_lock(&mutex_work_ind);
-                if(!((thread_info_t*)data)->work_ind) {
-                    go = 1;
-                }
-            pthread_mutex_unlock(&mutex_work_ind);
-            usleep(rand()%(NUMB_OF_THREADS*WAIT_TIME_MICROSECONDS));
-        }
     }
 
     return NULL;
@@ -182,13 +174,12 @@ void parallel_life(int size, int steps, int do_draw, int start_alive, int prob, 
 
     if(do_draw) {
         visualize(&field);
+        usleep(TM);
     }
-    usleep(TM);
-
-    pthread_mutex_init(&mutex_step, NULL);
-    pthread_mutex_init(&mutex_work_ind, NULL);
 
     double start_time = clock();
+
+    pthread_mutex_init(&mutex_step, NULL);
 
     done_work = 0;
 
@@ -197,7 +188,7 @@ void parallel_life(int size, int steps, int do_draw, int start_alive, int prob, 
         thread_info[i].steps = steps;
         thread_info[i].field = &field;
         thread_info[i].work_ind = 0;
-        if(pthread_create(threads + i, NULL, thread_func, thread_info + i)) {
+        if(pthread_create(threads + i, NULL, parallel_calc_next, thread_info + i)) {
             printf("ERROR_CREATE_THREAD\n");
             return;
         }
@@ -213,16 +204,17 @@ void parallel_life(int size, int steps, int do_draw, int start_alive, int prob, 
                 }
                 ++field.step;
                 done_work = 0;
-                pthread_mutex_lock(&mutex_work_ind);
                     for(int i = 0; i < NUMB_OF_THREADS;++i) {
-                        (thread_info + i)->work_ind = 0;
+                        // pthread_spin_lock(&mutex_work_ind[i]);
+                            (thread_info + i)->work_ind = 0;
+                        // pthread_mutex_unlock(&mutex_work_ind[i]);
                     }
-                pthread_mutex_unlock(&mutex_work_ind);
+                pthread_cond_broadcast(&cv);
             }
         pthread_mutex_unlock(&mutex_step);
         // printf("main_outside\n");
-        usleep(rand()%(WAIT_TIME_MICROSECONDS));
-        // usleep(WAIT_TIME_MICROSECONDS);
+        // usleep(rand()%(WAIT_TIME_MICROSECONDS));
+        usleep(WAIT_TIME_MICROSECONDS);
     }
 
     int status;
@@ -264,7 +256,7 @@ void life(int size, int steps, int do_draw, int start_alive, int prob, int* x, i
     }
 
     double times_per_sec = (clock() - start_time)/CLOCKS_PER_SEC;
-    printf("ONETHREAD_MODE: threads %d, steps: %d, size: %d, work time: %f\n", NUMB_OF_THREADS, steps, size, times_per_sec);
+    printf("ONETHREAD_MODE: threads %d, steps: %d, size: %d, work time: %f\n", 1, steps, size, times_per_sec);
 }
 
 void solve(int argc, char** argv) {
@@ -305,13 +297,18 @@ void solve(int argc, char** argv) {
 
     parallel_life(size, steps, do_draw, start_alive, prob, x, y);
     life(size, steps, do_draw, start_alive, prob, x, y);
+    printf("\n");
 }
 
 int main(int argc, char** argv) {
     srand(time(NULL));
+    // freopen("output.txt", "w", stdout);
+    // char[5] = {"0","1000","0","-1","5"};
+    double t = clock();
     solve(argc, argv);
     // char c = '#';
     // printf("%c\n",c);
     // printf("%c\n",c-1);
+    printf("t: %f\n", (clock() - t)/CLOCKS_PER_SEC);
     return 0;
 }
