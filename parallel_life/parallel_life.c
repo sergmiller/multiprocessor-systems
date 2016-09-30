@@ -8,8 +8,10 @@
 #include <memory.h>
 
 #define TM 3000
-#define NUMB_OF_THREADS 4
+#define MAX_NUMB_OF_THREADS 4
 #define WAIT_TIME_MICROSECONDS 20
+
+struct timespec begin, end;
 
 struct field{
     int step;
@@ -20,15 +22,12 @@ struct field{
 
 typedef struct field field_t;
 
-
 struct thread_info{
     int me_numb;
     int steps;
     int work_ind;
     field_t* field;
 };
-
-typedef struct thread_info thread_info_t;
 
 pthread_t threads[NUMB_OF_THREADS];
 pthread_mutex_t mutex_step;
@@ -128,7 +127,6 @@ void* parallel_calc_next(void* data) {
         char* cur_data = field->data[1 - t & 1];
         int cur_sum, nx, ny;
 
-
         for(int i = size/NUMB_OF_THREADS * me_id; i < size/NUMB_OF_THREADS * (me_id  + 1) + (i == NUMB_OF_THREADS - 1); ++i) {
             for(int j = 0;j < size; ++j) {
                  cur_sum = 0;
@@ -177,7 +175,8 @@ void parallel_life(int size, int steps, int do_draw, int start_alive, int prob, 
         usleep(TM);
     }
 
-    double start_time = clock();
+    // double start_time = clock();
+    clock_gettime(CLOCK_REALTIME, &begin);
 
     pthread_mutex_init(&mutex_step, NULL);
 
@@ -226,7 +225,8 @@ void parallel_life(int size, int steps, int do_draw, int start_alive, int prob, 
         }
     }
 
-    double times_per_sec = (clock() - start_time)/CLOCKS_PER_SEC;
+    clock_gettime(CLOCK_REALTIME, &end);
+    double times_per_sec = end.tv_sec - begin.tv_sec;
     printf("PARALLEL_MODE: threads %d, steps: %d, size: %d, work time: %f\n", NUMB_OF_THREADS, steps, size, times_per_sec);
 }
 
@@ -244,7 +244,7 @@ void life(int size, int steps, int do_draw, int start_alive, int prob, int* x, i
         usleep(TM);
     }
 
-    double start_time = clock();
+    clock_gettime(CLOCK_REALTIME, &begin);
     
     while(field.step < steps) {
         calc_next(&field);
@@ -255,7 +255,8 @@ void life(int size, int steps, int do_draw, int start_alive, int prob, int* x, i
         ++field.step;
     }
 
-    double times_per_sec = (clock() - start_time)/CLOCKS_PER_SEC;
+    clock_gettime(CLOCK_REALTIME, &end);
+    double times_per_sec = end.tv_sec - begin.tv_sec;
     printf("ONETHREAD_MODE: threads %d, steps: %d, size: %d, work time: %f\n", 1, steps, size, times_per_sec);
 }
 
