@@ -70,7 +70,7 @@ struct thread_info_simple{
 
 typedef struct thread_info_simple thread_info_simple_t;
 
-thread_info_simple_t thread_info[MAX_NUMB_OF_THREADS];
+thread_info_simple_t thread_info_s[MAX_NUMB_OF_THREADS];
 
 void init_simple_field(field_simple_t* field, char* data, int n, int m) {
     field->t = 0;
@@ -150,7 +150,7 @@ vector <vector <char> >  parallel_life_simple(char* field_data, int n, int m, in
     done_work = 0;
 
     for(int i = 0;i < th;++i) {
-        thread_info[i].me_numb = i;
+        thread_info_s[i].me_numb = i;
         thread_info[i].steps = tm;
         thread_info[i].field = &field;
         thread_info[i].work_ind = 0;
@@ -199,14 +199,13 @@ vector <vector <char> >  parallel_life_simple(char* field_data, int n, int m, in
 
 /**********************************FINE**********************************************/
 
-
 struct field_fine{
     int t,n,m;
     char* data[DEPTH_SIZE];
+    char partialy_calc[MAX_NUMB_OF_THREADS][DEPTH_SIZE];
 };
 
 typedef struct field_fine field_fine_t;
-
 
 struct thread_info_fine{
     int me_numb;
@@ -218,6 +217,7 @@ struct thread_info_fine{
 
 typedef struct thread_info_fine thread_info_fine_t;
 
+thread_info_fine_t thread_info_f;
 
 int cur_turn[MAX_NUMB_OF_THREADS];
 
@@ -228,6 +228,9 @@ void init_fine_field(field_simple_t* field, char* data, int n, int m) {
     field->data[0] = (char*)calloc(n * m, sizeof(char));
     for(int i = 1;i < DEPTH_SIZE;++i) {
         field->data[i] = (char*)malloc(n * m * sizeof(char));
+        for(int j = 0;j < MAX_NUMB_OF_THREADS;++j) {
+            field->partialy_calc[j][i] = 0;
+        }
     }
     for(int i = 0;i < n;++i) {
         for(int j = 0;j < m;++j) {
@@ -237,6 +240,62 @@ void init_fine_field(field_simple_t* field, char* data, int n, int m) {
 }
 
 
+void* parallel_calc_next_fine(void* void_data_p) {
+    thread_info_fine_t* data_p = (thread_info_fine_t*)void_data_p;
+    field_fine_t* field = data_p->field;
+    int me_id = data_p->me_numb;
+    int steps = data_p->steps;
+    int numb_threads = data_p->threads;
+    int* work_ind = &data_p->work_ind;
+    int n = field->n;
+    int m = field->m;
+
+    for(int t = 0; t < steps; ++t) {
+
+        char* prev_data = field->data[t%DEPTH_SIZE];
+        field->par
+        char* cur_data = field->data[(t+1)%DEPTH_SIZE];
+        int cur_sum, nx, ny;
+        int offset = 0;
+
+        for(int i = n/numb_threads * me_id + offset; i < n/numb_threads * (me_id  + 1) + (i == numb_threads - 1) * (n % numb_threads) - offset; ++i) {
+            for(int j = 0;j < m; ++j) {
+                 cur_sum = 0;
+
+                for(int k = 0; k < 8; ++k) {
+                    nx = (i + dirs[k][0] + n) % n;
+                    ny = (j + dirs[k][1] + m) % m;
+                    if(*(prev_data + m * nx + ny)) {
+                        ++cur_sum;
+                    }
+                }
+
+                char prev_point = *(prev_data + m * i + j);
+
+                if((!prev_point && cur_sum == 3) || (prev_point && (cur_sum == 2 || cur_sum == 3))) {
+                     *(cur_data + m * i + j) = 1;
+                } else {
+                     *(cur_data + m * i + j) = 0;
+                }
+            }
+        }
+
+        pthread_mutex_lock(&mutex_step);
+            // cout << me_id << " inside " << t << " step" << endl;
+            ++done_work;
+            *work_ind = 1;
+            // cout << "work_ind " << *work_ind << endl;
+            while(*work_ind) {
+                // cout << me_id << " wait " << t << " step" << endl;
+                pthread_cond_wait(&cv, &mutex_step);
+                // cout << me_id << " up " << t << " step" << endl;
+            }
+            // cout << me_id << " after " << t << " step" << endl;
+        pthread_mutex_unlock(&mutex_step);
+    }
+
+    return NULL;
+}
 
 vector <vector <char> >  parallel_life_fine(char* field_data, int n, int m, int tm, int th) {
     field_fine_t field;
@@ -246,7 +305,7 @@ vector <vector <char> >  parallel_life_fine(char* field_data, int n, int m, int 
         cur_turn[i] = 0;
     }
 
-        pthread_mutex_init(&mutex_step, NULL);
+    pthread_mutex_init(&mutex_step, NULL);
     pthread_cond_init(&cv, NULL);
 
     done_work = 0;
@@ -257,7 +316,7 @@ vector <vector <char> >  parallel_life_fine(char* field_data, int n, int m, int 
         thread_info[i].field = &field;
         thread_info[i].work_ind = 0;
         thread_info[i].threads = th;
-        if(pthread_create(threads + i, NULL, parallel_calc_next, thread_info + i)) {
+        if(pthread_create(threads + i, NULL, parallel_calc_next_fine, thread_info + i)) {
             cout << "ERROR_CREATE_THREAD" << endl;
             return vector <vector <char> > ();
         }
