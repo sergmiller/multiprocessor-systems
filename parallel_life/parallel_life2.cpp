@@ -11,8 +11,9 @@
 #include <iostream>
 #include <vector>
 
+#define DEPTH_SIZE 10
 #define MAX_NUMB_OF_THREADS 20
-#define WAIT_TIME_MICROSECONDS 1000
+#define WAIT_TIME_MICROSECONDS 10
 
 using std::vector;
 using std::cin;
@@ -59,7 +60,7 @@ int done_work;
 pthread_t threads[MAX_NUMB_OF_THREADS];
 int dirs[8][2] = {{0,1}, {1,0}, {-1,0}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
 
-struct thread_info{
+struct thread_info_simple{
     int me_numb;
     int steps;
     int work_ind;
@@ -67,9 +68,9 @@ struct thread_info{
     field_simple_t* field;
 };
 
-typedef struct thread_info thread_info_t;
+typedef struct thread_info_simple thread_info_simple_t;
 
-thread_info_t thread_info[MAX_NUMB_OF_THREADS];
+thread_info_simple_t thread_info[MAX_NUMB_OF_THREADS];
 
 void init_simple_field(field_simple_t* field, char* data, int n, int m) {
     field->t = 0;
@@ -85,7 +86,7 @@ void init_simple_field(field_simple_t* field, char* data, int n, int m) {
 }
 
 void* parallel_calc_next(void* void_data_p) {
-    thread_info_t* data_p = (thread_info_t*)void_data_p;
+    thread_info_simple_t* data_p = (thread_info_simple_t*)void_data_p;
     field_simple_t* field = data_p->field;
     int me_id = data_p->me_numb;
     int steps = data_p->steps;
@@ -190,11 +191,114 @@ vector <vector <char> >  parallel_life_simple(char* field_data, int n, int m, in
     //         ans[i][j] = field.data[i * m + j];
     //     }
     // }
-    cout << "out" << endl;
+    // cout << "out" << endl;
     return ans;
 }
 /**********************************SIMPLE********************************************/
 
+
+/**********************************FINE**********************************************/
+
+
+struct field_fine{
+    int t,n,m;
+    char* data[DEPTH_SIZE];
+};
+
+typedef struct field_fine field_fine_t;
+
+
+struct thread_info_fine{
+    int me_numb;
+    int steps;
+    int work_ind;
+    int threads;
+    field_fine_t* field;
+};
+
+typedef struct thread_info_fine thread_info_fine_t;
+
+
+int cur_turn[MAX_NUMB_OF_THREADS];
+
+void init_fine_field(field_simple_t* field, char* data, int n, int m) {
+    field->t = 0;
+    field->n = n;
+    field->m = m;
+    field->data[0] = (char*)calloc(n * m, sizeof(char));
+    for(int i = 1;i < DEPTH_SIZE;++i) {
+        field->data[i] = (char*)malloc(n * m * sizeof(char));
+    }
+    for(int i = 0;i < n;++i) {
+        for(int j = 0;j < m;++j) {
+            *(field->data[0] + m * i + j) = *(data + m * i + j);
+        }
+    }
+}
+
+
+
+vector <vector <char> >  parallel_life_fine(char* field_data, int n, int m, int tm, int th) {
+    field_fine_t field;
+    init_fine_field(&field, field_data, n, m);
+
+    for(int i = 0;i < th;++i) {
+        cur_turn[i] = 0;
+    }
+
+        pthread_mutex_init(&mutex_step, NULL);
+    pthread_cond_init(&cv, NULL);
+
+    done_work = 0;
+
+    for(int i = 0;i < th;++i) {
+        thread_info[i].me_numb = i;
+        thread_info[i].steps = tm;
+        thread_info[i].field = &field;
+        thread_info[i].work_ind = 0;
+        thread_info[i].threads = th;
+        if(pthread_create(threads + i, NULL, parallel_calc_next, thread_info + i)) {
+            cout << "ERROR_CREATE_THREAD" << endl;
+            return vector <vector <char> > ();
+        }
+    }
+    
+    while(field.t < tm) {
+        pthread_mutex_trylock(&mutex_step);
+        // cout << done_work << " " << field.t <<  endl;
+            if(done_work == th) {
+                // cout << "done_work: " << done_work << " th: " << th << endl;
+                // if(do_draw) {
+                //     visualize(&field);
+                // }
+                // cout << "turn: " << field.t << endl;
+                ++field.t;
+                done_work = 0;
+                for(int i = 0; i < th;++i) {
+                        (thread_info + i)->work_ind = 0;
+                }
+                pthread_cond_broadcast(&cv);
+            }
+        pthread_mutex_unlock(&mutex_step);
+        // cout << "main_outside" << endl;
+        // usleep(rand()%(WAIT_TIME_MICROSECONDS));
+        // usleep(WAIT_TIME_MICROSECONDS);
+    }
+
+
+    vector <vector <char> > ans;
+    // ans.resize(n, vector <char> m);
+    // int cur = tm % 2;
+    // for(int i = 0;i < n;++i) {
+    //     for(int j = 0;j < m;++j) {
+    //         ans[i][j] = field.data[i * m + j];
+    //     }
+    // }
+    // cout << "out" << endl;
+    return ans;
+}
+
+/**********************************FINE**********************************************/
 
 
 int main(int argc, char** argv) {
