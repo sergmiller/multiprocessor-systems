@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <memory.h>
 #include <unistd.h>
+#include "simple.h"
 
 #include <iostream>
 #include <vector>
@@ -106,7 +107,7 @@ void* parallel_calc_next(void* void_data_p) {
                  cur_sum = 0;
 
                 for(int k = 0; k < 8; ++k) {
-                    nx = (i + dirs[k][0] + n) % n;
+                    nx = (i + dirs[k][0] + n) % n;p
                     ny = (j + dirs[k][1] + m) % m;
                     if(*(prev_data + m * nx + ny)) {
                         ++cur_sum;
@@ -198,6 +199,7 @@ vector <vector <char> >  parallel_life_simple(char* field_data, int n, int m, in
 
 
 /**********************************FINE**********************************************/
+pthread_cond_t cv_f[DEPTH_SIZE];
 
 struct field_fine{
     int t,n,m;
@@ -221,7 +223,7 @@ thread_info_fine_t thread_info_f;
 
 int cur_turn[MAX_NUMB_OF_THREADS];
 
-void init_fine_field(field_simple_t* field, char* data, int n, int m) {
+void init_fine_field(field_fine_t* field, char* data, int n, int m) {
     field->t = 0;
     field->n = n;
     field->m = m;
@@ -249,14 +251,39 @@ void* parallel_calc_next_fine(void* void_data_p) {
     int* work_ind = &data_p->work_ind;
     int n = field->n;
     int m = field->m;
+    int offset;
+    int t = 0;
+    char back_flag;
 
-    for(int t = 0; t < steps; ++t) {
+    while(t <= steps) {
+        back_flag = 0;
+        pthread_mutex_lock(&mutex_step);
+            if(!thread_info_f[me_id]) {
+                back_flag = 1;
+            }
+            if(t == steps && field.t < steps) {
+                while() {
+                    pthread_cond_wait(&cv[t], &mutex_step);
+                }
+            }
+        pthread_mutex_unlock(&mutex_step);
+
+        if(back_flag) {
+            t = field.t;
+            continue;
+        }
+
+
+        pthread_mutex_lock(&mutex_step);
+            while((t + 1) % DEPTH_SIZE == field.t % DEPTH_SIZE || ) {
+                pthread_cond_wait(&cv[t], &mutex_step);
+            }
+            offset = t - field.t;
+        pthread_mutex_unlock(&mutex_step);
 
         char* prev_data = field->data[t%DEPTH_SIZE];
-        field->par
         char* cur_data = field->data[(t+1)%DEPTH_SIZE];
         int cur_sum, nx, ny;
-        int offset = 0;
 
         for(int i = n/numb_threads * me_id + offset; i < n/numb_threads * (me_id  + 1) + (i == numb_threads - 1) * (n % numb_threads) - offset; ++i) {
             for(int j = 0;j < m; ++j) {
@@ -286,12 +313,10 @@ void* parallel_calc_next_fine(void* void_data_p) {
             *work_ind = 1;
             // cout << "work_ind " << *work_ind << endl;
             while(*work_ind) {
-                // cout << me_id << " wait " << t << " step" << endl;
                 pthread_cond_wait(&cv, &mutex_step);
-                // cout << me_id << " up " << t << " step" << endl;
             }
-            // cout << me_id << " after " << t << " step" << endl;
         pthread_mutex_unlock(&mutex_step);
+        ++t;
     }
 
     return NULL;
@@ -306,9 +331,9 @@ vector <vector <char> >  parallel_life_fine(char* field_data, int n, int m, int 
     }
 
     pthread_mutex_init(&mutex_step, NULL);
-    pthread_cond_init(&cv, NULL);
-
-    done_work = 0;
+    for(int i = 0;i < DEPTH_SIZE;++i) {
+        pthread_cond_init(&cv_f[i], NULL);
+    }
 
     for(int i = 0;i < th;++i) {
         thread_info[i].me_numb = i;
@@ -321,22 +346,29 @@ vector <vector <char> >  parallel_life_fine(char* field_data, int n, int m, int 
             return vector <vector <char> > ();
         }
     }
+
+    int summ_work_n;
     
     while(field.t < tm) {
         pthread_mutex_trylock(&mutex_step);
         // cout << done_work << " " << field.t <<  endl;
-            if(done_work == th) {
+            summ_work_n = 0;
+            for(int i = 0;i < th;++i) {
+                if(thread_info_f[i].work_ind > field.t) {
+                    ++summ_work_n;
+                }
+            }
+            if(summ_work_n == th) {
                 // cout << "done_work: " << done_work << " th: " << th << endl;
                 // if(do_draw) {
                 //     visualize(&field);
                 // }
                 // cout << "turn: " << field.t << endl;
                 ++field.t;
-                done_work = 0;
                 for(int i = 0; i < th;++i) {
                         (thread_info + i)->work_ind = 0;
                 }
-                pthread_cond_broadcast(&cv);
+                pthread_cond_broadcast(&cv_f[(field.t - 2 + DEPTH_SIZE) % DEPTH_SIZE]);
             }
         pthread_mutex_unlock(&mutex_step);
         // cout << "main_outside" << endl;
