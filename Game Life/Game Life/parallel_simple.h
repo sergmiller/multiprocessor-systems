@@ -152,15 +152,6 @@ vector <vector <char> >  life_p_simple(vector <vector <char> > & data, int n, in
         }
     }
     
-    
-//    vector <vector <char> > ans;
-//    ans.resize(n, vector <char> (m));
-//    int cur = tm & 1;
-//    for(int i = 0;i < n;++i) {
-//        for(int j = 0;j < m;++j) {
-//            ans[i][j] = field.data[cur][i][j];
-//        }
-//    }
     cout << "out" << endl;
     return field.data[tm & 1];
 }

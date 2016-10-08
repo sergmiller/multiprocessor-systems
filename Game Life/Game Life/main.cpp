@@ -23,7 +23,7 @@ using std::endl;
 
 #define INPUT "input.txt"
 
-void inir_random_field(vector <vector <char> >& field,  int n, int m, float p) {
+void init_random_field(vector <vector <char> >& field,  int n, int m, float p) {
     for(int i = 0;i < n;++i) {
         for(int j = 0;j < m;++j) {
             field[i][j] = (rand() <= RAND_MAX * p);
@@ -70,19 +70,44 @@ int main(int argc, const char * argv[]) {
     }
 
     field.resize(n,vector <char> (m));
-    inir_random_field(field,n,m,p);
+    init_random_field(field,n,m,p);
+    
+    struct timespec begin, end;
+    
+    
     
     vector<vector <char> > ans_s_simple, ans_p_simple, ans_p_fine;
     
+    cout << "n = " << n << " ,m = " << m << " ,time = " << tm << " ,threads = " << th << endl;
+    
+    long elapsed_seconds;
+    
+    clock_gettime(CLOCK_REALTIME, &begin);
     ans_s_simple = life_s_simple(field, n, m, tm);
+    clock_gettime(CLOCK_REALTIME, &end);
+    
+    elapsed_seconds = end.tv_sec - begin.tv_sec;
+    cout << "serial simple: " << elapsed_seconds << " s" << endl;
     
     
+    clock_gettime(CLOCK_REALTIME, &begin);
     ans_p_simple = life_p_simple(field, n, m, tm, th);
+    clock_gettime(CLOCK_REALTIME, &end);
 
+    elapsed_seconds= end.tv_sec - begin.tv_sec;
+    cout << "parallel simple: " << elapsed_seconds << " s" << endl;
     
-//    ans_p_fine = life_p_fine(field, n, m, tm, th);
+    
+    clock_gettime(CLOCK_REALTIME, &begin);
+    ans_p_fine = life_p_fine(field, n, m, tm, th);
+    clock_gettime(CLOCK_REALTIME, &end);
+    
+    elapsed_seconds = end.tv_sec - begin.tv_sec;
+    cout << "parallel fine: " << elapsed_seconds << " s" << endl;
     
     test(ans_s_simple, ans_p_simple);
+    
+    test(ans_s_simple, ans_p_fine);
     
     return 0;
 }
