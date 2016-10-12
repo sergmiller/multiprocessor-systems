@@ -14,14 +14,12 @@
 #include <cstdio>
 #include <ctime>
 #include <pthread.h>
-#include <pthread.h>
 #include <memory.h>
 #include <unistd.h>
 
 #include "series.h"
 
 //#define MAX_NUMB_OF_THREADS 20
-#define CYCLE_LEN 20
 
 using std::vector;
 using std::cin;
@@ -46,14 +44,15 @@ struct thread_info_simple {
     int me_id;
     int th;
     int done_work;
-    field_simple& field;
-    thread_info_simple(field_simple& _field, pthread_mutex_t* _mutex_p,    pthread_cond_t* _cv_p, pthread_cond_t* _main_cv_p, int _id, int _steps, int _th): field(_field) {
+    field_simple* field_t;
+    thread_info_simple(field_simple* _field_t, pthread_mutex_t* _mutex_p,    pthread_cond_t* _cv_p, pthread_cond_t* _main_cv_p, int _id, int _steps, int _th) {
         me_id = _id;
         mutex_p = _mutex_p;
         cv_p = _cv_p;
         main_cv_p = _main_cv_p;
         steps = _steps;
         th = _th;
+        field_t = _field_t;
         done_work = 0;
     }
 };
@@ -63,15 +62,15 @@ pthread_cond_t main_cv;
 
 void* calc_next_p_simple(void* void_info_simple_p) {
     thread_info_simple* info_t = (thread_info_simple*)void_info_simple_p;
-    field_simple& field = info_t->field;
+    field_simple* field_t = info_t->field_t;
     
     int me_id = info_t->me_id;
     int steps = info_t->steps;
     int th = info_t->th;
-    int n = (int)field.data[0].size();
-    int m = (int)field.data[0][0].size();
+    int n = (int)field_t->data[0].size();
+    int m = (int)field_t->data[0][0].size();
     int* done_work_p = &info_t->done_work;
-    int* done_all_works_p = &field.done_all_works;
+    int* done_all_works_p = &field_t->done_all_works;
     
     pthread_mutex_t* mutex_p = info_t->mutex_p;
     pthread_cond_t* cv_p = info_t->cv_p;
@@ -85,7 +84,7 @@ void* calc_next_p_simple(void* void_info_simple_p) {
         next = 1 - cur;
         
         for(int i = lb; i < rb; ++i) {
-            calc_next(field.data[cur], field.data[next], i, n, m);
+            calc_next(&field_t->data[cur], &field_t->data[next], i, n, m);
         }
         
         pthread_mutex_lock(mutex_p);
@@ -115,12 +114,12 @@ vector <vector <char> >  life_p_simple(vector <vector <char> > & data, int n, in
     field_simple field(data, th);
     info.reserve(th);
     
-    
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&cv, NULL);
     pthread_cond_init(&main_cv, NULL);
     for(int i = 0; i < th; ++i) {
-        info.push_back(thread_info_simple(field, &mutex, &cv, &main_cv, i, tm, th));
+        thread_info_simple cur_info(&field, &mutex, &cv, &main_cv, i, tm, th);
+        info.push_back(cur_info);
         if(pthread_create(&threads[i], NULL, calc_next_p_simple, &info[i])) {
             cout << "ERROR: CAN'T CREATE THREAD" << endl;
             return vector <vector <char> > ();
@@ -152,7 +151,7 @@ vector <vector <char> >  life_p_simple(vector <vector <char> > & data, int n, in
         }
     }
     
-    cout << "out" << endl;
+//    cout << "out" << endl;
     return field.data[tm & 1];
 }
 

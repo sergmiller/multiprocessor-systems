@@ -20,7 +20,7 @@ using std::cout;
 using std::endl;
 
 
-void calc_next(vector <vector <char> >& cur, vector <vector <char> >& next,int i,int n, int m) {
+void calc_next(vector <vector <char> >* cur, vector <vector <char> >* next,int i,int n, int m) {
     int sum, px, py;
     for(int j = 0;j < m;++j) {
         sum = 0;
@@ -31,13 +31,13 @@ void calc_next(vector <vector <char> >& cur, vector <vector <char> >& next,int i
                 }
                 px = (i + x + n) % n;
                 py = (j + y + m) % m;
-                sum += cur[px][py];
+                sum += (*cur)[px][py];
             }
         }
-        if((!cur[i][j] && sum == 3) || (cur[i][j] && (sum == 2))) {
-            next[i][j] = 1;
+        if((!(*cur)[i][j] && sum == 3) || ((*cur)[i][j] && (sum == 2))) {
+            (*next)[i][j] = 1;
         } else {
-            next[i][j] = 0;
+            (*next)[i][j] = 0;
         }
     }
 }
@@ -53,11 +53,11 @@ vector <vector <char> >  life_s_simple(vector <vector <char> > & data, int n, in
         int cur = t & 1;
         int next = 1 - cur;
         for(int i = 0;i < n;++i) {
-            calc_next(field[cur], field[next], i, n, m);
+            calc_next(&field[cur], &field[next], i, n, m);
         }
     }
-    
-    cout << "out" << endl;
+
+//    cout << "out" << endl;
     return field[tm & 1];
 }
 
