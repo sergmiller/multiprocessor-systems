@@ -1,0 +1,90 @@
+n = 500 ,m = 500 ,time = 1000 ,threads = 1 , cycle= 10
+serial simple: 109 s
+parallel simple: 113 s
+parallel fine: 108 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 2 , cycle= 10
+serial simple: 109 s
+parallel simple: 58 s
+parallel fine: 56 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 3 , cycle= 10
+serial simple: 105 s
+parallel simple: 38 s
+parallel fine: 39 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 4 , cycle= 10
+serial simple: 111 s
+parallel simple: 35 s
+parallel fine: 34 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 5 , cycle= 10
+serial simple: 109 s
+parallel simple: 25 s
+parallel fine: 26 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 6 , cycle= 10
+serial simple: 108 s
+parallel simple: 23 s
+parallel fine: 21 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 7 , cycle= 10
+serial simple: 113 s
+parallel simple: 29 s
+parallel fine: 20 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 8 , cycle= 10
+serial simple: 113 s
+parallel simple: 22 s
+parallel fine: 19 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 9 , cycle= 10
+serial simple: 113 s
+parallel simple: 22 s
+parallel fine: 16 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 10
+serial simple: 112 s
+parallel simple: 22 s
+parallel fine: 20 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 11 , cycle= 10
+serial simple: 116 s
+parallel simple: 26 s
+parallel fine: 21 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 12 , cycle= 10
+serial simple: 113 s
+parallel simple: 28 s
+parallel fine: 22 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 13 , cycle= 10
+serial simple: 114 s
+parallel simple: 22 s
+parallel fine: 19 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 14 , cycle= 10
+serial simple: 110 s
+parallel simple: 26 s
+parallel fine: 20 s
+OK
+OK
+n = 500 ,m = 500 ,time = 1000 ,threads = 15 , cycle= 10
+serial simple: 114 s
+parallel simple: 23 s
+parallel fine: 18 s
+OK
+OK

@@ -1,0 +1,114 @@
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 3
+parallel simple: 40 s
+parallel fine: 38 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 4
+parallel simple: 42 s
+parallel fine: 33 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 5
+parallel simple: 46 s
+parallel fine: 36 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 6
+parallel simple: 45 s
+parallel fine: 35 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 7
+parallel simple: 41 s
+parallel fine: 33 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 8
+parallel simple: 53 s
+parallel fine: 36 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 9
+parallel simple: 46 s
+parallel fine: 37 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 10
+parallel simple: 49 s
+parallel fine: 34 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 11
+parallel simple: 44 s
+parallel fine: 36 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 12
+parallel simple: 46 s
+parallel fine: 36 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 13
+parallel simple: 45 s
+parallel fine: 31 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 14
+parallel simple: 45 s
+parallel fine: 32 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 15
+parallel simple: 45 s
+parallel fine: 33 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 16
+parallel simple: 55 s
+parallel fine: 39 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 17
+parallel simple: 45 s
+parallel fine: 38 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 18
+parallel simple: 49 s
+parallel fine: 39 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 19
+parallel simple: 49 s
+parallel fine: 34 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 20
+parallel simple: 49 s
+parallel fine: 39 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 21
+parallel simple: 42 s
+parallel fine: 34 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 22
+parallel simple: 47 s
+parallel fine: 37 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 23
+parallel simple: 55 s
+parallel fine: 38 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 24
+parallel simple: 46 s
+parallel fine: 32 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 25
+parallel simple: 47 s
+parallel fine: 30 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 26
+parallel simple: 42 s
+parallel fine: 33 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 27
+parallel simple: 45 s
+parallel fine: 32 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 28
+parallel simple: 47 s
+parallel fine: 31 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 29
+parallel simple: 46 s
+parallel fine: 32 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 30
+parallel simple: 48 s
+parallel fine: 40 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 31
+parallel simple: 48 s
+parallel fine: 30 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 32
+parallel simple: 46 s
+parallel fine: 33 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 33
+parallel simple: 46 s
+parallel fine: 31 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 34
+parallel simple: 43 s
+parallel fine: 32 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 35
+parallel simple: 46 s
+parallel fine: 33 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 36
+parallel simple: 45 s
+parallel fine: 37 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 37
+parallel simple: 52 s
+parallel fine: 41 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 38
+parallel simple: 45 s
+parallel fine: 29 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 39
+parallel simple: 44 s
+parallel fine: 30 s
+n = 1000 ,m = 500 ,time = 1000 ,threads = 10 , cycle= 40
+parallel simple: 44 s
+parallel fine: 30 s
