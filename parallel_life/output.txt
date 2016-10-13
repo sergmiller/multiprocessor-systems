@@ -1,4 +1,0 @@
-PARALLEL_MODE: threads 4, steps: 1, size: 1000, work time: 0.111768
-ONETHREAD_MODE: threads 1, steps: 1, size: 1000, work time: 0.062910
-
-t: 0.174765
