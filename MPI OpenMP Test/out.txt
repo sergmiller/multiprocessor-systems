@@ -1,0 +1,2 @@
+series time: 28 s, n = 200000000, th =10
+OpenMP time: 4 s, n = 200000000, th =10
