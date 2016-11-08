@@ -1,2 +1,2 @@
 all:
-	g++ -fopenmp sumwithomp.cpp -o sumomp
+	clang-omp++ -fopenmp sumwithomp.cpp -o sumomp

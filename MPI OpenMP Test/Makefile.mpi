@@ -1,2 +1,2 @@
 all:
-	mpiCC piwithmpi.cpp -o pimpi
+	mpic++ piwithmpi.cpp -o pimpi

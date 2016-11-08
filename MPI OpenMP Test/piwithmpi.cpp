@@ -17,13 +17,13 @@ int main(int argc, char** argv) {
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD,&th);
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-        int left = rank*(n/th), right = (rank + 1)*(n/th);
+        long long left = rank*(n/th), right = (rank + 1)*(n/th);
         if(rank + 1 == th) {
 		right += n % th;
 	}
 	long  double pi = 0;
         for(long long i = left;i < right;++i) {
-                pi += pow(-1,((2*i+1)%4 == 3))/(2*i + 1);
+                pi += powl(-1,((2*i+1)%4 == 3))/((long double)(2*i + 1));
         }
 
 	if(rank) {

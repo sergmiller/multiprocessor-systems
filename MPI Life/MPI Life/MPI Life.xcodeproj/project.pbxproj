@@ -1,0 +1,267 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B9BD86C31DC40C2B00ECF2D8 /* life_mpi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9BD86C21DC40C2B00ECF2D8 /* life_mpi.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B9BD86BD1DC40C2A00ECF2D8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		B950CF7A1DD1F52F003E17D5 /* input.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = input.txt; sourceTree = "<group>"; };
+		B950CF7B1DD22887003E17D5 /* tools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
+		B950CF7C1DD22917003E17D5 /* series.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = series.h; sourceTree = "<group>"; };
+		B950CF7D1DD2294F003E17D5 /* master.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = master.h; sourceTree = "<group>"; };
+		B950CF7E1DD2295B003E17D5 /* slave.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = slave.h; sourceTree = "<group>"; };
+		B9BD86BF1DC40C2B00ECF2D8 /* MPI Life */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "MPI Life"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9BD86C21DC40C2B00ECF2D8 /* life_mpi.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = life_mpi.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B9BD86BC1DC40C2A00ECF2D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B9BD86B61DC40C2A00ECF2D8 = {
+			isa = PBXGroup;
+			children = (
+				B9BD86C11DC40C2B00ECF2D8 /* MPI Life */,
+				B9BD86C01DC40C2B00ECF2D8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B9BD86C01DC40C2B00ECF2D8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B9BD86BF1DC40C2B00ECF2D8 /* MPI Life */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B9BD86C11DC40C2B00ECF2D8 /* MPI Life */ = {
+			isa = PBXGroup;
+			children = (
+				B9BD86C21DC40C2B00ECF2D8 /* life_mpi.cpp */,
+				B950CF7B1DD22887003E17D5 /* tools.h */,
+				B950CF7C1DD22917003E17D5 /* series.h */,
+				B950CF7D1DD2294F003E17D5 /* master.h */,
+				B950CF7E1DD2295B003E17D5 /* slave.h */,
+				B950CF7A1DD1F52F003E17D5 /* input.txt */,
+			);
+			path = "MPI Life";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B9BD86BE1DC40C2A00ECF2D8 /* MPI Life */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B9BD86C61DC40C2B00ECF2D8 /* Build configuration list for PBXNativeTarget "MPI Life" */;
+			buildPhases = (
+				B9BD86BB1DC40C2A00ECF2D8 /* Sources */,
+				B9BD86BC1DC40C2A00ECF2D8 /* Frameworks */,
+				B9BD86BD1DC40C2A00ECF2D8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MPI Life";
+			productName = "MPI Life";
+			productReference = B9BD86BF1DC40C2B00ECF2D8 /* MPI Life */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B9BD86B71DC40C2A00ECF2D8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = sergmiller;
+				TargetAttributes = {
+					B9BD86BE1DC40C2A00ECF2D8 = {
+						CreatedOnToolsVersion = 8.0;
+						DevelopmentTeam = 2V75G8JXAV;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = B9BD86BA1DC40C2A00ECF2D8 /* Build configuration list for PBXProject "MPI Life" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B9BD86B61DC40C2A00ECF2D8;
+			productRefGroup = B9BD86C01DC40C2B00ECF2D8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B9BD86BE1DC40C2A00ECF2D8 /* MPI Life */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B9BD86BB1DC40C2A00ECF2D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9BD86C31DC40C2B00ECF2D8 /* life_mpi.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B9BD86C41DC40C2B00ECF2D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B9BD86C51DC40C2B00ECF2D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B9BD86C71DC40C2B00ECF2D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = 2V75G8JXAV;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B9BD86C81DC40C2B00ECF2D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = 2V75G8JXAV;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B9BD86BA1DC40C2A00ECF2D8 /* Build configuration list for PBXProject "MPI Life" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B9BD86C41DC40C2B00ECF2D8 /* Debug */,
+				B9BD86C51DC40C2B00ECF2D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B9BD86C61DC40C2B00ECF2D8 /* Build configuration list for PBXNativeTarget "MPI Life" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B9BD86C71DC40C2B00ECF2D8 /* Debug */,
+				B9BD86C81DC40C2B00ECF2D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B9BD86B71DC40C2A00ECF2D8 /* Project object */;
+}
