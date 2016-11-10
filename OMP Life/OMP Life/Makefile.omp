@@ -1,0 +1,2 @@
+all:
+	clang-omp++ -fopenmp lifeomp.cpp -o lifeomp
