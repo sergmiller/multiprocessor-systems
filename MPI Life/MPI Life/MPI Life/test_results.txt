@@ -1,0 +1,50 @@
+series time: 38s
+mpi time: 38s
+OK
+n = 1000, m = 1000, tm = 100, th = 2
+series time: 0s
+mpi time: 37s
+n = 1000, m = 1000, tm = 100, th = 2
+series time: 0s
+mpi time: 19s
+n = 1000, m = 1000, tm = 100, th = 3
+series time: 0s
+mpi time: 13s
+n = 1000, m = 1000, tm = 100, th = 4
+series time: 0s
+mpi time: 9s
+n = 1000, m = 1000, tm = 100, th = 5
+series time: 0s
+mpi time: 7s
+n = 1000, m = 1000, tm = 100, th = 6
+series time: 0s
+mpi time: 6s
+n = 1000, m = 1000, tm = 100, th = 7
+series time: 0s
+mpi time: 5s
+n = 1000, m = 1000, tm = 100, th = 8
+series time: 0s
+mpi time: 4s
+n = 1000, m = 1000, tm = 100, th = 9
+series time: 0s
+mpi time: 4s
+n = 1000, m = 1000, tm = 100, th = 10
+series time: 0s
+mpi time: 3s
+n = 1000, m = 1000, tm = 100, th = 11
+series time: 0s
+mpi time: 3s
+n = 1000, m = 1000, tm = 100, th = 12
+series time: 0s
+mpi time: 3s
+n = 1000, m = 1000, tm = 100, th = 13
+series time: 0s
+mpi time: 3s
+n = 1000, m = 1000, tm = 100, th = 14
+series time: 0s
+mpi time: 3s
+n = 1000, m = 1000, tm = 100, th = 15
+series time: 0s
+mpi time: 2s
+n = 1000, m = 1000, tm = 100, th = 16
+OK
