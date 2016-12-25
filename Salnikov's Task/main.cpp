@@ -14,8 +14,8 @@
 
 #include "field.h"
 
-#define STATE = "state.txt"
-#define CREATURES = "creatures.conf"
+#define STATE = "state_fix.txt"
+#define CREATURES = "creatures_fix.conf"
 #define FINAL = "final_state.txt"
 #define STEPLIMIT 1000
 
@@ -45,5 +45,7 @@ int main(int argc, char const *argv[]) {
 
     //init field with data from I files
     field f(startState, creatures, steps);
+
+    field res = seriesCalc(f);
     return 0;
 }
