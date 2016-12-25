@@ -9,16 +9,18 @@
 
 #include <math.h>
 
-#include <omp.h>
-#include <mpi.h>
+// #include <omp.h>
+// #include <mpi.h>
 
 #include "field.h"
+#include "seriesCalc.h"
 
-#define STATE = "state_fix.txt"
-#define CREATURES = "creatures_fix.conf"
-#define FINAL = "final_state.txt"
+#define STATE "state_fix.txt"
+#define CREATURES "creatures_fix.conf"
+#define FINAL "final_state.txt"
 #define STEPLIMIT 1000
 
+using std::cin;
 using std::cout;
 using std::endl;
 using std::vector;
@@ -27,6 +29,7 @@ using std::string;
 
 //in argv fixed input files in strong format without comments
 int main(int argc, char const *argv[]) {
+    srand((unsigned int)time(NULL));
     std::ios::sync_with_stdio(false);
     string startState = STATE, creatures = CREATURES, finalSate = FINAL;
     ui32 steps = STEPLIMIT;
