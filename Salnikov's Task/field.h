@@ -44,7 +44,7 @@ struct cell {
 };
 
 struct field {
-    ui32 n, m, stepLimit, numbAlive;
+    ui32 n, m, stepLimit, numbAlive1, numbAlive2;
     ui32 vConsumeFeed, vConsumeStuff1, vConsumeStuff2;
     ui32 vProduceStuff1, vProduceStuff2;
     ui32 divisionBound, pollutionBound;
@@ -52,7 +52,7 @@ struct field {
     bool turned;
     field(string stateFile, string creaturesFile, ui32 _stepLimit = STEPLIMIT) {
         turned = 0;
-        numbAlive = 0;
+        numbAlive1 = numbAlive2 = 0;
         stepLimit = _stepLimit;
         FILE* fp;
         fp = freopen(stateFile.data(), "r", stdin);
@@ -73,7 +73,8 @@ struct field {
             cin >> curCell.feed >> curCell.stuff1 >> curCell.stuff2
             >> curCell.exist1 >> curCell.maxHunger >> curCell.exist2;
             data[x][y] = curCell;
-            numbAlive += (curCell.exist1 + curCell.exist2);
+            numbAlive1 += curCell.exist1;
+            numbAlive2 += curCell.exist2;
         }
         fclose(fp);
         fp = freopen(creaturesFile.data(), "r", stdin);

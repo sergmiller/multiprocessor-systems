@@ -37,7 +37,7 @@ void calcLine(field& f, ui32 line, ui32 t) {
     cell curCell;
     ui32 px, py, numbFreeSpaceAround, n = f.n, m = f.m;
     ui64 numbFeedAround, numbStuff1Around, numbStuff2Around;
-    bool freeSpaceAround[3][3];
+    int ind;
     pair <ui64, pair <int, int> > feedAround[9];
     pair <ui64, pair <int, int> > stuff1Around[9];
     pair <ui64, pair <int, int> > stuff2Around[9];
@@ -52,32 +52,31 @@ void calcLine(field& f, ui32 line, ui32 t) {
                     px = (line + x + n) % n;
                     py = (k + y + m) % m;
 
-                    freeSpaceAround[x][y] = 0;
-                    if((x || y) && !curCell.exist2) {
-                         freeSpaceAround[x][y] = 1;
+                    if((x || y) && !f.data[x][y].exist2) {
                          ++numbFreeSpaceAround;
                     }
 
-                    feedAround[3*x + y] = mp(f.data[px][py].feed, mp(x,y));
-                    stuff1Around[3*x + y] = mp(f.data[px][py].stuff1, mp(x,y));
-                    stuff2Around[3*x + y] = mp(f.data[px][py].stuff2, mp(x,y));
+                    ind = 3*(x+1) + y + 1;
+                    feedAround[ind] = mp(f.data[px][py].feed, mp(x,y));
+                    stuff1Around[ind] = mp(f.data[px][py].stuff1, mp(x,y));
+                    stuff2Around[ind] = mp(f.data[px][py].stuff2, mp(x,y));
 
-                    numbFeedAround += feedAround[3*x + y].first;
-                    numbStuff1Around += stuff1Around[3*x + y].first;
-                    numbStuff2Around += stuff2Around[3*x + y].first;
+                    numbFeedAround += feedAround[ind].first;
+                    numbStuff1Around += stuff1Around[ind].first;
+                    numbStuff2Around += stuff2Around[ind].first;
                 }
             }
             sort(feedAround, feedAround + 9);
             sort(stuff1Around, stuff1Around + 9);
             sort(stuff2Around, stuff2Around + 9);
-
+            // cout << "consume part" << endl;
             //consume part
             if(curCell.exist1) {
                 ui64 needConsumeFeed = f.vConsumeFeed;
                 ui64 curConsumeFeed;
                 for(int i = 0;i < 9;++i) {
-                    px = feedAround[i].second.first;
-                    py = feedAround[i].second.second;
+                    px = (line + feedAround[i].second.first + n) % n;
+                    py = (k + feedAround[i].second.second + m) % m;
                     curConsumeFeed = min((needConsumeFeed + (8 - i))/(9 - i),
                         f.data[px][py].feed);
                     curConsumeFeed = min(
@@ -90,8 +89,8 @@ void calcLine(field& f, ui32 line, ui32 t) {
                         + needConsumeFeed;
                     ui64 curConsumeStuff2;
                     for(int i = 0;i < 9;++i) {
-                        px = stuff2Around[i].second.first;
-                        py = stuff2Around[i].second.second;
+                        px = (line + stuff2Around[i].second.first + n) % n;
+                        py = (k + stuff2Around[i].second.second + m) % m;
                         curConsumeStuff2 = min(
                             (needConsumeStuff2 + (8 - i))/(9 - i),
                             f.data[px][py].stuff2);
@@ -104,6 +103,8 @@ void calcLine(field& f, ui32 line, ui32 t) {
                         ++curCell.hungerRounds;
                         if(curCell.hungerRounds == curCell.maxHunger) {
                             curCell.exist1 = 0;
+                            curCell.hungerRounds = 0;
+                            --f.numbAlive1;
                         }
                     } else {
                         curCell.hungerRounds = 0;
@@ -117,8 +118,8 @@ void calcLine(field& f, ui32 line, ui32 t) {
                 ui64 needConsumeStuff1 = f.vConsumeFeed;
                 ui64 curConsumeStuff1;
                 for(int i = 0;i < 9;++i) {
-                    px = stuff1Around[i].second.first;
-                    py = stuff1Around[i].second.second;
+                    px = (line + stuff1Around[i].second.first + n) % n;
+                    py = (k + stuff1Around[i].second.second + m) % m;
                     curConsumeStuff1 = min(
                         (needConsumeStuff1 + (8 - i))/(9 - i),
                         f.data[px][py].stuff1);
@@ -129,36 +130,45 @@ void calcLine(field& f, ui32 line, ui32 t) {
                 }
                 if (needConsumeStuff1 > 0) {
                     curCell.exist2 = 0;
+                    --f.numbAlive2;
                 }
             }
-
+            // cout << "divide and pollution part" << endl;
             //divide and pollution part
             if(curCell.stuff1 >= f.pollutionBound) {
                 curCell.exist1 = 0;
+                --f.numbAlive1;
             }
 
-            if(curCell.stuff2 >= f.divisionBound && curCell.exist2) {
+            if(curCell.stuff2 >= f.divisionBound
+                && curCell.exist2 && numbFreeSpaceAround) {
                 int gen = rand() % numbFreeSpaceAround;
+                bool add = false;
                 for(int x = -1;x <= 1; ++x) {
                     for(int y = -1; y <= 1; ++y) {
                         if(!x && !y) {
                             continue;
                         }
 
-                        px = (line + x + f.n) % f.n;
-                        py = (k + y + f.m) % f.m;
+                        px = (line + x + n) % n;
+                        py = (k + y + m) % m;
+
+                        if(f.data[px][py].exist2)
+                            continue;
 
                         if(!gen) {
                             f.data[px][py].exist2 = 1;
+                            ++f.numbAlive2;
+                            add = true;
                             break;
                         }
                         --gen;
                     }
-                    if(!gen)
+                    if(add)
                         break;
                 }
             }
-
+            // cout << "produce part" << endl;
             //produce part
             if(curCell.exist2)
                 curCell.stuff1 += f.vProduceStuff1;
@@ -190,12 +200,12 @@ void calcLine(field& f, ui32 line, ui32 t) {
 // }
 
 void visualize(field f) {
+    sleep(1);
     system("clear");
-    sleep(2);
     int n = f.n, m = f.m;
     for(ui32 i = 0;i < n;++i) {
         for(ui32 j = 0;j < m;++j) {
-            ui32 sum = 2*f.data[i][j].exist1 + 2*f.data[i][j].exist2;
+            ui32 sum = f.data[i][j].exist1 + 2*f.data[i][j].exist2;
             if(sum == 3)
                 printf("3");
             if(sum == 2)
@@ -213,12 +223,17 @@ field seriesCalc(field f) {
     ui32 n = f.n, m = f.m, stepLimit = f.stepLimit;
 
     for(ui32 t = 0; t < stepLimit; ++t) {
+        // cout << t << " OK" << endl;
         for(ui32 i = 0; i < n; ++i) {
+            // cout << i << endl;
             calcLine(f, i, t);
         }
+        visualize(f);
+
+        cout << t + 1 << " " << f.numbAlive1 << " " <<  f.numbAlive2 << endl;
     }
 
-    visualize(f);
+
 
     return f;
 }
