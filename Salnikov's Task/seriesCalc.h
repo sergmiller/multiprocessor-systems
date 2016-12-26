@@ -17,7 +17,7 @@
 // #include <mpi.h>
 
 #include "field.h"
-#include "feedGenerator.h"
+#include "tools.h"
 
 #define mp make_pair
 
@@ -33,7 +33,7 @@ using std::make_pair;
 typedef unsigned long long ui64;
 typedef unsigned int ui32;
 
-void calcLine(field& f, ui32 line, ui32 t) {
+void calcLine(field& f, ui32 line) {
     cell curCell;
     ui32 px, py, numbFreeSpaceAround, n = f.n, m = f.m;
     ui64 numbFeedAround, numbStuff1Around, numbStuff2Around;
@@ -43,16 +43,18 @@ void calcLine(field& f, ui32 line, ui32 t) {
     pair <ui64, pair <int, int> > stuff2Around[9];
 
     for (ui32 k = 0;k < m;++k) {
+        // cout << "k = " << k << endl;
         curCell = f.data[line][k];
         if(curCell.exist1 || curCell.exist2) {
             numbFreeSpaceAround = 0;
             for(int x = -1; x <= 1; ++x) {
                 for(int y = -1;y <= 1; ++y) {
+                    // cout << x << " " << y << endl;
 
                     px = (line + x + n) % n;
                     py = (k + y + m) % m;
 
-                    if((x || y) && !f.data[x][y].exist2) {
+                    if((x || y) && !f.data[px][py].exist2) {
                          ++numbFreeSpaceAround;
                     }
 
@@ -100,12 +102,13 @@ void calcLine(field& f, ui32 line, ui32 t) {
                         needConsumeStuff2 -= curConsumeStuff2;
                     }
                     if(needConsumeStuff2 > 0) {
-                        ++curCell.hungerRounds;
+                        cout << "hunger " << curCell.hungerRounds << " / " << curCell.maxHunger << endl;
                         if(curCell.hungerRounds == curCell.maxHunger) {
                             curCell.exist1 = 0;
                             curCell.hungerRounds = 0;
                             --f.numbAlive1;
                         }
+                        ++curCell.hungerRounds;
                     } else {
                         curCell.hungerRounds = 0;
                     }
@@ -135,7 +138,7 @@ void calcLine(field& f, ui32 line, ui32 t) {
             }
             // cout << "divide and pollution part" << endl;
             //divide and pollution part
-            if(curCell.stuff1 >= f.pollutionBound) {
+            if(curCell.stuff1 >= f.pollutionBound && curCell.exist1) {
                 curCell.exist1 = 0;
                 --f.numbAlive1;
             }
@@ -174,7 +177,7 @@ void calcLine(field& f, ui32 line, ui32 t) {
                 curCell.stuff1 += f.vProduceStuff1;
             if(curCell.exist1)
                 curCell.stuff2 += f.vProduceStuff2;
-            vector <ui64> newStuff = feedGenerator(line,k,t,curCell);
+            vector <ui64> newStuff = feedGenerator(line,k,f.step,curCell);
             curCell.feed = newStuff[0];
             curCell.stuff1 = newStuff[1];
             curCell.stuff2 = newStuff[2];
@@ -223,18 +226,24 @@ field seriesCalc(field f) {
     ui32 n = f.n, m = f.m, stepLimit = f.stepLimit;
 
     for(ui32 t = 0; t < stepLimit; ++t) {
-        // cout << t << " OK" << endl;
-        for(ui32 i = 0; i < n; ++i) {
-            // cout << i << endl;
-            calcLine(f, i, t);
-        }
         visualize(f);
 
         cout << t + 1 << " " << f.numbAlive1 << " " <<  f.numbAlive2 << endl;
+        // cout << t << " OK" << endl;
+        for(ui32 i = 0; i < n; ++i) {
+            // cout << i << endl;
+            calcLine(f, i);
+        }
+
+        if(f.numbAlive1 + f.numbAlive2 == 0) {
+            visualize(f);
+            cout << "final step: " << f.step + 1 << endl;
+            break;
+        }
+
+        ++f.step;
     }
-
-
-
+    
     return f;
 }
 

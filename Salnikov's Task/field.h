@@ -27,7 +27,6 @@ typedef unsigned int ui32;
 
 #define STEPLIMIT 100
 
-
 //full information about of cell on field
 struct cell {
     ui64 feed;
@@ -35,8 +34,8 @@ struct cell {
     ui64 stuff2;
     ui32 hungerRounds;
     ui32 maxHunger;
-    char exist1;
-    char exist2;
+    ui32 exist1;
+    ui32 exist2;
     cell() {
         feed = stuff1 = stuff2 = hungerRounds = 0;
         maxHunger = exist1 = exist2 = 0;
@@ -44,13 +43,15 @@ struct cell {
 };
 
 struct field {
-    ui32 n, m, stepLimit, numbAlive1, numbAlive2;
-    ui32 vConsumeFeed, vConsumeStuff1, vConsumeStuff2;
-    ui32 vProduceStuff1, vProduceStuff2;
-    ui32 divisionBound, pollutionBound;
+    ui32 n, m, step, stepLimit;
+    ui64 numbAlive1, numbAlive2;
+    ui64 vConsumeFeed, vConsumeStuff1, vConsumeStuff2;
+    ui64 vProduceStuff1, vProduceStuff2;
+    ui64 divisionBound, pollutionBound;
     vector <vector <cell> > data;
     bool turned;
     field(string stateFile, string creaturesFile, ui32 _stepLimit = STEPLIMIT) {
+        step = 0;
         turned = 0;
         numbAlive1 = numbAlive2 = 0;
         stepLimit = _stepLimit;
@@ -62,7 +63,6 @@ struct field {
             turned = 1;
             swap(n,m);
         }
-
         data.resize(n, vector <cell> (m));
         ui32 x,y;
         cell curCell;
@@ -75,6 +75,7 @@ struct field {
             data[x][y] = curCell;
             numbAlive1 += curCell.exist1;
             numbAlive2 += curCell.exist2;
+            cout << numbAlive1 << " " << curCell.exist1 << endl;
         }
         fclose(fp);
         fp = freopen(creaturesFile.data(), "r", stdin);

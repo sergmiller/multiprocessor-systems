@@ -14,6 +14,7 @@
 
 #include "field.h"
 #include "seriesCalc.h"
+#include "tools.h"
 
 #define STATE "state_fix.txt"
 #define CREATURES "creatures_fix.conf"
@@ -25,7 +26,6 @@ using std::cout;
 using std::endl;
 using std::vector;
 using std::string;
-
 
 //in argv fixed input files in strong format without comments
 int main(int argc, char const *argv[]) {
@@ -49,5 +49,7 @@ int main(int argc, char const *argv[]) {
     field f(startState, creatures, steps);
 
     field res = seriesCalc(f);
+
+    writeStateToFile(finalSate, res);
     return 0;
 }
