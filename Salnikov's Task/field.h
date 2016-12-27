@@ -42,6 +42,13 @@ struct cell {
     }
 };
 
+struct fieldData {
+    ui64 numbAlive1, numbAlive2;
+    ui64 vConsumeFeed, vConsumeStuff1, vConsumeStuff2;
+    ui64 vProduceStuff1, vProduceStuff2;
+    ui64 divisionBound, pollutionBound;
+};
+
 struct field {
     ui32 n, m, step, stepLimit;
     ui64 numbAlive1, numbAlive2;
