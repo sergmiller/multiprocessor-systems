@@ -1,0 +1,3 @@
+all:
+	mpic++  -openmp  parallel_main.cpp -o parallel_life
+

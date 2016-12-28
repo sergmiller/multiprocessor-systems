@@ -13,11 +13,12 @@
 
 #include <math.h>
 
-// #include <omp.h>
-// #include <mpi.h>
+#include "omp.h"
+#include <mpi.h>
 
 #include "field.h"
 #include "tools.h"
+#include "parallelTools.h"
 
 #define mp make_pair
 
@@ -50,12 +51,13 @@ typedef unsigned int ui32;
 // }
 
 
-field parallelCalc(field f, MPI_Datatype* cell_type) {
+field parallelCalc(field f, ui32 th,
+                    MPI_Datatype cell_type, MPI_Status* status) {
     ui32 n = f.n, m = f.m, stepLimit = f.stepLimit;
     ui32 fieldSize[2] = {n,m};
     ui64 metaData[9];
 
-    metaData[0] = f.numbAlive1
+    metaData[0] = f.numbAlive1;
     metaData[1] = f.numbAlive2;
     metaData[2] = f.vConsumeFeed;
     metaData[3] = f.vConsumeStuff1;
@@ -96,16 +98,31 @@ field parallelCalc(field f, MPI_Datatype* cell_type) {
 
     for(int i = 1; i < th;++i) {
         bounds = get_bounds(i,th,n);
-//        cout << bounds.first << " " << bounds.second << endl;
+    //    cout << bounds.first << " " << bounds.second << endl;
         for(int j = bounds.first; j < bounds.second; ++j) {
-            MPI_Send(&f.data[j][0], m, mpi_cell_type, i, i, MPI_COMM_WORLD);
+            MPI_Send(&f.data[j][0], m, cell_type, i, 0, MPI_COMM_WORLD);
         }
+    }
+
+    vector <ui64> numbAlive1(th-1);
+    vector <ui64> numbAlive2(th-1);
+    ui64 summ;
+    for(int i = 0;i < f.stepLimit; ++i) {
+        summ = 0;
+        MPI_Gather(NULL, 1, MPI_UNSIGNED_LONG, numbAlive1,
+            th - 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+        #pragma omp parallel for numb_threads(10)
+        for(int j = 0;j < th -1;++j) {
+            summ += numbAlive1[j];
+        }
+        cout << i << " " << summ << endl;
     }
 
     for(int i = 1;i < th;++i) {
         bounds = get_bounds(i,th,n);
+        // cout << "master " << i << endl;
         for(int j = bounds.first; j < bounds.second; ++j) {
-            MPI_Recv(&f.data[j][0], m, mpi_cell_type, i,
+            MPI_Recv(&f.data[j][0], m, cell_type, i,
                 5, MPI_COMM_WORLD, status);
         }
     }

@@ -82,7 +82,7 @@ struct field {
             data[x][y] = curCell;
             numbAlive1 += curCell.exist1;
             numbAlive2 += curCell.exist2;
-            cout << numbAlive1 << " " << curCell.exist1 << endl;
+            // cout << numbAlive1 << " " << curCell.exist1 << endl;
         }
         fclose(fp);
         fp = freopen(creaturesFile.data(), "r", stdin);

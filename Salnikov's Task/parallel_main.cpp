@@ -10,16 +10,18 @@
 #include <math.h>
 
 // #include <omp.h>
-// #include <mpi.h>
+#include <mpi.h>
+#include <stddef.h>
 
 #include "field.h"
 #include "parallelCalc.h"
+#include "parallelSlave.h"
 #include "tools.h"
 
 #define STATE "state_fix.txt"
 #define CREATURES "creatures_fix.conf"
 #define FINAL "final_state.txt"
-#define STEPLIMIT_MAIN 1000
+#define STEPLIMIT_MAIN 10
 
 using std::cin;
 using std::cout;
@@ -29,12 +31,20 @@ using std::string;
 
 
 //in argv fixed input files in strong format without comments
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
     srand((unsigned int)time(NULL));
     std::ios::sync_with_stdio(false);
     string startState = STATE, creatures = CREATURES, finalSate = FINAL;
     ui32 steps = STEPLIMIT_MAIN;
     //read custom I/O files and step limit
+
+    int th, rank;
+
+    MPI_Status status;
+    MPI_Init(&argc,&argv);
+    MPI_Comm_size(MPI_COMM_WORLD,&th);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
     if(argc > 1) {
         steps = atoi(argv[1]);
         if(argc > 3) {
@@ -45,13 +55,6 @@ int main(int argc, char const *argv[]) {
             }
         }
     }
-
-    ui32 th, rank;
-
-    MPI_Status status;
-    MPI_Init(&argc,&argv);
-    MPI_Comm_size(MPI_COMM_WORLD,&th);
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
     //definition cell for mpi
     const int nitems = 7;
@@ -82,10 +85,10 @@ int main(int argc, char const *argv[]) {
     if(!rank) {
     //init field with data from I files
     field f(startState, creatures, steps);
-    field res = parallelCalc(f, &mpi_cell_type);
-    writeStateToFile(finalSate, res);
+    field res = parallelCalc(f, th, mpi_cell_type, &status);
+        writeStateToFile(finalSate, res);
     } else
-        parallelSlave(th, rank, &status, &mpi_cell_type);
+        parallelSlave(th, rank, steps, mpi_cell_type, &status);
 
     MPI_Type_free(&mpi_cell_type);
     MPI_Finalize();

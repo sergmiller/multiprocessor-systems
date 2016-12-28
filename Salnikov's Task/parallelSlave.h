@@ -13,11 +13,12 @@
 
 #include <math.h>
 
-// #include <omp.h>
-// #include <mpi.h>
+#include "omp.h"
+#include <mpi.h>
 
 #include "field.h"
 #include "tools.h"
+#include "parallelTools.h"
 
 #define mp make_pair
 
@@ -33,8 +34,9 @@ using std::make_pair;
 typedef unsigned long long ui64;
 typedef unsigned int ui32;
 
-void parallelSlave(ui32 th, ui32 rank,
-        MPI_Status* status, MPI_Datatype* cell_type) {
+void parallelSlave(ui32 th, ui32 rank, ui32 tm,
+     MPI_Datatype cell_type, MPI_Status* status) {
+        //  cout << rank << " slave" << endl;
     ui32 n,m;
     fieldData data;
     ui32 fieldSize[2];
@@ -42,8 +44,8 @@ void parallelSlave(ui32 th, ui32 rank,
     MPI_Bcast(&fieldSize, 2, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
     MPI_Bcast(&metaData, 9, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
     n = fieldSize[0], m = fieldSize[1];
-    data.numbAlive1 = metaData[0];
-    data.numbAlive2 = metaData[1];
+    data.numbAlive1 = 0;
+    data.numbAlive2 = 0;
     data.vConsumeFeed = metaData[2];
     data.vConsumeStuff1 = metaData[3];
     data.vConsumeStuff2 = metaData[4];
@@ -58,7 +60,8 @@ void parallelSlave(ui32 th, ui32 rank,
     field_part.resize(bounds.second - bounds.first + 2, vector <cell>(m));
 
     for(int i = bounds.first; i < bounds.second; ++i) {
-        MPI_Recv(&field_part[i-bounds.first + 1][0],
+        // cout << "slave " << rank << " " << i << endl;
+        MPI_Recv(&field_part[i-bounds.first][0],
             m, cell_type, 0, 0, MPI_COMM_WORLD, status);
     }
 
@@ -77,14 +80,23 @@ void parallelSlave(ui32 th, ui32 rank,
         next = 1;
     }
 
+    for(int i = 0;i < delta;++i) {
+        for(int j = 0; j < m;++j) {
+            data.numbAlive1 += field_part[i][j].exist1;
+            data.numbAlive2 += field_part[i][j].exist2;
+        }
+    }
+
     MPI_Request export_request[4];
     MPI_Request import_request[4];
 
     for(int t = 0; t < tm; ++t) {
+        #pragma omp sections
+        // cout << th << " " << t << endl;
         for(int i = 2; i < delta - 2; ++i) {
             // calcLine(&field_part[cur_part], &field_part[1-cur_part],
             //   i, bounds.second - bounds.first + 2, m);
-            parallelCalcLine(&field_part, data, i, t);
+            parallelCalcLine(field_part, data, i, t);
         }
 
         if(t) {
@@ -98,35 +110,38 @@ void parallelSlave(ui32 th, ui32 rank,
             MPI_Wait(&import_request[3], status);
         }
 
-        parallelCalcLine(&field_part, data, 1, t);
-        parallelCalcLine(&field_part, data, delta-1, t);
-        
+        parallelCalcLine(field_part, data, 1, t);
+        parallelCalcLine(field_part, data, delta-1, t);
+
         //Send first and second line to left neighboor
-        MPI_Isend(&field_part[cur_part][0][0],
+        MPI_Isend(&field_part[0][0],
             m, cell_type, prev, 1, MPI_COMM_WORLD, &export_request[0]);
-        MPI_Isend(&field_part[cur_part][1][0],
+        MPI_Isend(&field_part[1][0],
             m, cell_type, prev, 2, MPI_COMM_WORLD, &export_request[1]);
 
         //Revieve first and second line from right neighboor
-        MPI_Irecv(&field_part[cur_part][delta][0], m, cell_type,
+        MPI_Irecv(&field_part[delta][0], m, cell_type,
             next, 1, MPI_COMM_WORLD, &import_request[0]);
-        MPI_Irecv(&field_part[cur_part][delta + 1][0], m, cell_type,
+        MPI_Irecv(&field_part[delta + 1][0], m, cell_type,
             next, 2, MPI_COMM_WORLD, &import_request[1]);
 
-        parallelCalcLine(&field_part, data, delta-1, t);
-        parallelCalcLine(&field_part, data, delta, t);
+        parallelCalcLine(field_part, data, delta-1, t);
+        parallelCalcLine(field_part, data, delta, t);
 
         //Send last and last - 1 line to right neighboor
-        MPI_Isend(&field_part[cur_part][delta][0],
+        MPI_Isend(&field_part[delta][0],
             m, cell_type, next, 3, MPI_COMM_WORLD, &export_request[2]);
-        MPI_Isend(&field_part[cur_part][delta + 1][0],
+        MPI_Isend(&field_part[delta + 1][0],
                 m, cell_type, next, 4, MPI_COMM_WORLD, &export_request[3]);
 
         //Revieve last and last - 1 line from left neighboor
-        MPI_Irecv(&field_part[cur_part][0][0], m, cell_type,
+        MPI_Irecv(&field_part[0][0], m, cell_type,
             prev, 3, MPI_COMM_WORLD, &import_request[2]);
-        MPI_Irecv(&field_part[cur_part][1][0], m, cell_type,
+        MPI_Irecv(&field_part[1][0], m, cell_type,
             prev, 4, MPI_COMM_WORLD, &import_request[3]);
+        #pragma omp section
+        MPI_Gather(&data.numbAlive1, 1, MPI_UNSIGNED_LONG, NULL,
+            th - 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
     }
 
     MPI_Wait(&export_request[0], status);
@@ -141,6 +156,7 @@ void parallelSlave(ui32 th, ui32 rank,
     for(int i = 0; i < delta; ++i) {
         MPI_Send(&field_part[i][0],
             m, cell_type, 0, 5, MPI_COMM_WORLD);
+    }
 }
 
 #endif

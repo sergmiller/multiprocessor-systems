@@ -14,7 +14,7 @@
 #include <math.h>
 
 // #include <omp.h>
-// #include <mpi.h>
+#include <mpi.h>
 
 #include "field.h"
 #include "tools.h"
@@ -57,7 +57,7 @@ void parallelCalcLine(vector <vector <cell> >& f, fieldData& data,
                 for(int y = -1;y <= 1; ++y) {
                     // cout << x << " " << y << endl;
 
-                    px = (line + x;
+                    px = line + x;
                     py = (k + y + m) % m;
 
                     if((x || y) && !f[px][py].exist2) {
